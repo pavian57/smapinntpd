@@ -3,7 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <time.h>
+#include <utime.h>
 
 #ifndef PLATFORM_WIN32
 #define INVALID_SOCKET -1
