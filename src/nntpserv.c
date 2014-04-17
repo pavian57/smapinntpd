@@ -1347,6 +1347,27 @@ void command_xover(struct var *var)
    socksendtext(var,"." CRLF);
 }
 
+
+void command_mode_reader(struct var *var)
+{
+   uchar *tmp;
+
+   if(!(tmp=parseinput(var)))
+   {
+      socksendtext(var,"501 Command missing after MODE" CRLF);
+      return;
+   }
+
+   if(stricmp(tmp,"reader")==0)
+   {
+      socksendtext(var,"200 You are already in this mode. Ignored." CRLF);
+      return;
+   }
+   socksendtext(var,"501 Unknown MODE option" CRLF);
+   return;
+}
+
+
 #define POST_MAXSIZE 20000
 
 bool getcontenttypepart(uchar *line,ulong *pos,uchar *dest,ulong destlen)
@@ -2050,9 +2071,9 @@ void command_post(struct var *var)
    while(!finished && !var->disconnect && !get_server_quit() && sockreadline(var,line,1000))
    {
       if(line[0] && cfg_debug)
-         printf("(%s) < %s",var->clientid,line);
+         printf("(%s) ! %s",var->clientid,line);
 
-      if(stricmp(line,"." CRLF) == 0)
+      if(stricmp(line,"." CRLF) == 0 || stricmp(line,"." LF) == 0)
       {
          finished=TRUE;
       }
@@ -2263,7 +2284,7 @@ void command_post(struct var *var)
    from[36]=0;
    subject[72]=0;
    organization[70]=0;
-   newsreader[75]=0;
+   newsreader[85]=0;
 
    /* Check syntax */
 
@@ -3165,6 +3186,10 @@ void server(SOCKET s)
          {
             command_xover(&var);
          }
+         else if(stricmp(cmd,"MODE")==0)
+         {
+            command_mode_reader(&var);
+         }         
          else
          {
             socksendtext(&var,"500 Unknown command" CRLF);
